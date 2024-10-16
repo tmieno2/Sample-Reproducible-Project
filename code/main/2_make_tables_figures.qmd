@@ -1,6 +1,17 @@
-#!===========================================================
-# ! Visual illustration of the data
-# !===========================================================
+# Objective
+
+Create figures and tables for publication.
+
+# Preparation
+
+```{r}
+library(modelsummary)
+```
+
+# Make figures and tables
+
+## Visual illustration of the data
+```{r}
 #--- read the data ---#
 reg_data <- readRDS("data/processed/reg_data.rds")
 
@@ -16,12 +27,11 @@ ggsave("results/figures/delay_box.png", g_delay, dpi = 600, width = 6, height = 
 
 #--- for PDF ---#
 ggsave("results/figures/delay_box.pdf", g_delay, width = 6, height = 5)
+```
 
-# !===========================================================
-# ! Regression table
-# !===========================================================
-library(modelsummary)
+## Regression table
 
+```{r}
 #--- create regression results table ---#
 reg_table <-
   readRDS("results/reg_results.rds") %>%
@@ -31,4 +41,4 @@ reg_table <-
   )
 
 saveRDS(reg_table, "results/tables/reg_table.rds")
-
+```

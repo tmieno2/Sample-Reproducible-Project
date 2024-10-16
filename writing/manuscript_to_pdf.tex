@@ -41,14 +41,28 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \setcounter{secnumdepth}{2}
 % Make \paragraph and \subparagraph free-standing
+\makeatletter
 \ifx\paragraph\undefined\else
   \let\oldparagraph\paragraph
-  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
 \fi
 \ifx\subparagraph\undefined\else
   \let\oldsubparagraph\subparagraph
-  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
+\makeatother
 
 
 \providecommand{\tightlist}{%
@@ -104,35 +118,40 @@
   \setlength{\itemsep}{#2\baselineskip}}}
  {\end{list}}
 \usepackage{calc}
-\newcommand{\CSLBlock}[1]{\hfill\break#1\hfill\break}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
+% Place figures and tables exactly where they were called
+\usepackage{float}
+\floatplacement{figure}{H}
+\floatplacement{table}{H}
+
+% Recommended by the modelsummary package
 \usepackage{booktabs}
 \usepackage{siunitx}
+\newcolumntype{d}{S[input-symbols = ()]}
 
-  \newcolumntype{d}{S[
-    input-open-uncertainty=,
-    input-close-uncertainty=,
-    parse-numbers = false,
-    table-align-text-pre=false,
-    table-align-text-post=false
-  ]}
-  
-\usepackage{longtable}
-\usepackage{array}
-\usepackage{multirow}
-\usepackage{wrapfig}
+% Add affiliations (title.tex needs to be called under template-partials)
+\usepackage[noblocks]{authblk}
+\renewcommand*{\Authsep}{, }
+\renewcommand*{\Authand}{, }
+\renewcommand*{\Authands}{, }
+\renewcommand\Affilfont{\small}
+
+% Add line numbers
+\usepackage{lineno}
+\linenumbers
 \usepackage{float}
-\usepackage{colortbl}
-\usepackage{pdflscape}
-\usepackage{tabu}
-\usepackage{threeparttable}
-\usepackage{threeparttablex}
+\usepackage{tabularray}
 \usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{xcolor}
+\usepackage{graphicx}
+\UseTblrLibrary{booktabs}
+\UseTblrLibrary{siunitx}
+\NewTableCommand{\tinytableDefineColor}[3]{\definecolor{#1}{#2}{#3}}
+\newcommand{\tinytableTabularrayUnderline}[1]{\underline{#1}}
+\newcommand{\tinytableTabularrayStrikeout}[1]{\sout{#1}}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -169,15 +188,17 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \makeatother
 \makeatletter
+\makeatother
+\makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
-\makeatletter
-\makeatother
+
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
-\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\usepackage{bookmark}
+
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
@@ -191,15 +212,27 @@
   urlcolor={Blue},
   pdfcreator={LaTeX via pandoc}}
 
-\title{The Impact of Weather on Flight Delay}
-\author{Forgot MyName \and No Name}
-\date{2023-10-02}
 
+\title{The Impact of Weather on Flight Delay}
+
+
+  \author{Forgot MyName}
+            \affil{%
+                  Random University
+              }
+        \author{No Name}
+            \affil{%
+                  Highest-ranked University
+              }
+      
+\date{2024-10-16}
 \begin{document}
 \maketitle
 \begin{abstract}
 Abstract: this research is so awesome that you cannot reject this paper.
 \end{abstract}
+
+
 \section{Introduction}\label{introduction}
 
 Nothing is more frustrating than flight delays. The goal of this article
@@ -232,22 +265,29 @@ package (\citeproc{ref-nycflights13}{Wickham 2021}).
 \caption{Summary Statistics}\tabularnewline
 
 \centering
-\begin{tabular}[t]{lrrr}
+\begin{tblr}[         %% tabularray outer open
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]},
+column{1}={halign=l,},
+column{2}={halign=r,},
+column{3}={halign=r,},
+column{4}={halign=r,},
+}                     %% tabularray inner close
 \toprule
-  & Mean & SD & Max\\
-\midrule
-dep\_delay & \num{12.64} & \num{40.21} & \num{1301.00}\\
-temp & \num{55.57} & \num{17.10} & \num{92.14}\\
-precip & \num{0.005} & \num{0.01} & \num{0.15}\\
-wind\_speed & \num{10.45} & \num{4.19} & \num{56.39}\\
+& Mean & SD & Max \\ \midrule %% TinyTableHeader
+dep\_delay  & \num{12.64} & \num{40.21} & \num{1301.00} \\
+temp         & \num{55.57} & \num{17.10} & \num{92.14}   \\
+precip       & \num{0.00}  & \num{0.01}  & \num{0.15}    \\
+wind\_speed & \num{10.45} & \num{4.19}  & \num{56.39}   \\
 \bottomrule
-\end{tabular}
+\end{tblr}
 \end{table}
 
 Figure \textbf{?@fig-hist-delay} shows the histogram of departure delay
 by carrier for each of the airports.
 
-\begin{figure}
+\begin{figure}[H]
 
 {\centering \includegraphics{../results/figures/delay_box.pdf}
 
@@ -265,25 +305,33 @@ by carrier for each of the airports.
 \caption{Regression Results}\tabularnewline
 
 \centering
-\begin{tabular}[t]{lccc}
+\begin{talltblr}[         %% tabularray outer open
+entry=none,label=none,
+note{}={+ p < 0.1, * p < 0.05, ** p < 0.01, *** p < 0.001},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]},
+column{1}={halign=l,},
+column{2}={halign=c,},
+column{3}={halign=c,},
+column{4}={halign=c,},
+hline{10}={1,2,3,4}{solid, 0.05em, black},
+}                     %% tabularray inner close
 \toprule
-  & Model 1 & Model 2 & Model 3\\
-\midrule
-(Intercept) & \num{0.068} &  & \\
- & (\num{0.348}) &  & \\
-temp & \num{0.145}*** & \num{0.251}+ & \num{0.251}**\\
- & (\num{0.004}) & (\num{0.125}) & (\num{0.023})\\
-precip & \num{379.641}*** & \num{348.979}** & \num{348.979}**\\
- & (\num{5.363}) & (\num{105.112}) & (\num{28.751})\\
-wind\_speed & \num{0.274}*** & \num{0.326}+ & \num{0.326}*\\
- & (\num{0.018}) & (\num{0.155}) & (\num{0.059})\\
-\midrule
-Num.Obs. & \num{326164} & \num{326164} & \num{326164}\\
-R2 & \num{0.020} & \num{0.034} & \num{0.034}\\
-Std.Errors & IID & by: month & by: origin\\
+& (1) & (2) & (3) \\ \midrule %% TinyTableHeader
+(Intercept)  & \num{0.068}      &                  &                  \\
+& (\num{0.348})    &                  &                  \\
+temp         & \num{0.145}***   & \num{0.251}+    & \num{0.251}**   \\
+& (\num{0.004})    & (\num{0.125})   & (\num{0.023})   \\
+precip       & \num{379.641}*** & \num{348.979}** & \num{348.979}** \\
+& (\num{5.363})    & (\num{105.112}) & (\num{28.751})  \\
+wind\_speed & \num{0.274}***   & \num{0.326}+    & \num{0.326}*    \\
+& (\num{0.018})    & (\num{0.155})   & (\num{0.059})   \\
+Num.Obs.     & \num{326164}     & \num{326164}    & \num{326164}    \\
+R2           & \num{0.020}      & \num{0.034}     & \num{0.034}     \\
+Std.Errors   & IID               & by: month        & by: origin       \\
 \bottomrule
-\multicolumn{4}{l}{\rule{0pt}{1em}+ p $<$ 0.1, * p $<$ 0.05, ** p $<$ 0.01, *** p $<$ 0.001}\\
-\end{tabular}
+\end{talltblr}
 \end{table}
 
 \section{Conclusion}\label{conclusion}
@@ -311,6 +359,7 @@ Wickham, Hadley,
 Flights that departed NYC in 2013},''} (2021).
 
 \end{CSLReferences}
+
 
 
 

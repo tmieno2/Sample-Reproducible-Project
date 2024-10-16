@@ -1,6 +1,17 @@
+# Objective
+
+Read raw datasets and process them for analysis.
+
+# Preparation
+
+```{r}
 #--- packages ---#
 library(tidyverse)
+```
 
+# Process datasets
+
+```{r}
 #--- read datasets ---#
 # The working directory is set to the root project folder
 flights <- read_csv("data/raw/flights.csv")
@@ -24,4 +35,6 @@ weather_daily <-
 #--- merge datasets ---#
 reg_data <- left_join(flights_avg, weather_daily, by = c("month", "day", "origin"))
 
+#--- save the data ---#
 saveRDS(reg_data, "data/processed/reg_data.rds")
+```
